@@ -25,7 +25,7 @@ sentiments <- get_sentiments("nrc")
 sentiments
 
 tidyComms %>% inner_join(sentiments) %>% 
-  count(uniqueID, word, sort= T)
+  count(drugName, word, sort= T)
 
 tidyComms %>% inner_join(get_sentiments("bing")) %>% count(word, sentiment, sort = T) %>% 
   acast(formula = word ~ sentiment, value.var = "n", fill = 0) %>% 
@@ -52,3 +52,43 @@ tidyComms %>% semi_join(negative) %>%
 tidyComms %>% semi_join(negative) %>% 
   group_by(condition) %>% 
   summarise(negativewords = n())
+
+
+tidyComms %>% count(word, sort = T)
+
+wordComms<- tidyComms %>% 
+  count(drugName, word, sort= T)
+
+totalWords <- wordComms %>% group_by(drugName) %>% 
+  summarize(total = sum(n))
+
+
+wordComms <- left_join(wordComms, totalWords)
+
+top6<- wordComms %>%  arrange(desc(total)) %>% distinct(drugName, total) %>% top_n(6)
+
+wordComms %>% inner_join(top6, by = c("drugName", "total")) %>% ggplot(aes(n/total, fill = drugName))+
+  geom_histogram(show.legend = F) + xlim(NA, 0.009) + facet_wrap(~drugName, ncol=2, scales = "free_y")
+
+
+freq_by_rank <- wordComms %>% group_by(drugName) %>% mutate(rank = row_number(), term.frequency= n/total)
+
+freq_by_rank %>% inner_join(top6, by= c("drugName", "total")) %>% ggplot(aes(rank, term.frequency, color = drugName)) + 
+  geom_line(size = 1.1, alpha = 0.8, show.legend = F)+
+  scale_x_log10()+
+  scale_y_log10()
+
+rank_subset <- freq_by_rank %>% 
+  filter(rank < 500,
+         rank > 10)
+
+
+lm(log10(term.frequency) ~ log10(rank), data=rank_subset)
+
+
+freq_by_rank %>% inner_join(top6, by = c("drugName", "total")) %>% 
+  ggplot(aes(rank, term.frequency, color = drugName)) +
+  geom_abline(intercept = -0.62, slope = -1.1, color = "gray50", linetype = 2) +
+  geom_line(size = 1.1, alpha = 0.8, show.legend = FALSE) +
+  scale_x_log10() +
+  scale_y_log10()
