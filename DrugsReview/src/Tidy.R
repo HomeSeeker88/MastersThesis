@@ -7,7 +7,7 @@ data("stop_words")
 
 drugsCom.train <- read_tsv("Data/drugsComTrain_raw.tsv")
 
-drugsCom.train <- drugsCom.train %>% mutate(condition = ifelse(str_detect(condition, "users found this"), NA, condition))
+drugsCom.train <- drugsCom.train %>% mutate(condition = ifelse(str_detect(condition, "users found this"), NA, condition)) %>%  anti_join(stop_words)
 
 tidyComms <- drugsCom.train %>% unnest_tokens(word, review) %>% anti_join(stop_words)
 
@@ -92,3 +92,30 @@ freq_by_rank %>% inner_join(top6, by = c("drugName", "total")) %>%
   geom_line(size = 1.1, alpha = 0.8, show.legend = FALSE) +
   scale_x_log10() +
   scale_y_log10()
+
+wordComms
+
+wordComms <- wordComms %>% 
+  bind_tf_idf(drugName, word, n)
+
+wordComms
+
+wordComms %>% select(-total) %>% 
+  arrange(desc(tf_idf))
+
+
+wordComms %>% arrange(desc(tf_idf)) %>% 
+  inner_join(top6) %>% 
+  mutate(word = factor(word, levels = rev(unique(word)))) %>% 
+  group_by(drugName) %>% 
+  top_n(n = 2) %>% 
+  ungroup() %>% 
+  ggplot(aes(word, tf_idf, fill = drugName)) +
+  geom_col(show.legend = F) +
+  labs(x = NULL, y = "tf-idf") + 
+  facet_wrap(~drugName, ncol = 2, scales = "free") +
+  coord_flip()
+
+
+
+tidyComms
