@@ -8,6 +8,7 @@
 #
 
 library(shiny)
+library(shiny)
 
 # Define UI for application that draws a histogram
 shinyUI(
@@ -27,7 +28,9 @@ shinyUI(
                 # First tab content
                 tabItem(tabName = "exploratory",
                         fluidRow(selectInput("inputCateg", label = "Wybierz kategorię",
-                                                                     choices = unique(drugsCom.train$condition)))
+                                                                     choices = unique(drugsCom.train$condition))),
+                        selectInput("inputDrug", label = "Wybierz lek", choices = unique(drugsCom.train$drugName)),
+                        dataTableOutput("reviews")
                 ),
                 
                 # Second tab content
@@ -37,6 +40,5 @@ shinyUI(
             )
         )
     )
-    
 )
 
