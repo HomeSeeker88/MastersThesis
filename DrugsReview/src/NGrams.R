@@ -77,3 +77,20 @@ ggraph(bigrams.graph, layout = "fr") +
   geom_edge_link() +
   geom_node_point() +
   geom_node_text(aes(label = name), vjust = 1, hjust = 1)
+
+
+set.seed(2016)
+
+a <- grid::arrow(type = "closed", length = unit(.15, "inches"))
+
+ggraph(bigrams.graph, layout = "fr") + 
+  geom_edge_link(aes(edge_alpha = n), show.legend = F, arrow = a, end_cap = circle(.07, "inches")) +
+  geom_node_point(color = "lightblue", size = 5) +
+  geom_node_text(aes(label = name), vjust = 1, hjust = 1) +
+  theme_void()
+
+
+drugsCom.train <- drugsCom.train %>%
+  mutate(condition = ifelse(str_detect(condition, "users found this"), NA, condition))
+
+
