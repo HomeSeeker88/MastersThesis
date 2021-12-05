@@ -7,6 +7,15 @@ data("stop_words")
 
 drugsCom.train <- read_tsv("Data/drugsComTrain_raw.tsv")
 
+drugsCom.train <- drugsCom.train %>% 
+  mutate(condition = case_when(
+    str_detect(condition, "Cance") ~ case_when(
+      !str_detect(condition, "Cancer") ~ str_replace(condition, "Cance", "Cancer"),
+      TRUE ~ condition
+    ),
+    TRUE ~ condition
+  )) %>% mutate(condition = ifelse(str_detect(condition, "users found this"), NA, condition))
+
 stop_words
 drugsCom.bigrams <- drugsCom.train %>%
   mutate(condition = ifelse(str_detect(condition, "users found this"), NA, condition)) %>% unnest_tokens(bigram,
