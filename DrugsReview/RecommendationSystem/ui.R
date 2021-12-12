@@ -8,7 +8,7 @@
 #
 
 library(shiny)
-library(shiny)
+library(shinydashboard)
 
 # Define UI for application that draws a histogram
 shinyUI(
@@ -30,13 +30,17 @@ shinyUI(
                         fluidRow(selectInput("inputCateg", label = "Wybierz kategorię",
                                                                      choices = unique(drugsCom.train$condition))),
                         selectInput("inputDrug", label = "Wybierz lek", choices = unique(drugsCom.train$drugName)),
-                        dataTableOutput("reviews")
+                        dataTableOutput("reviews"),
+                        plotlyOutput("condition_piechart"),
+                        plotlyOutput("drugName_piechart")
                 ),
                 
                 # Second tab content
                 tabItem(tabName = "sentiment",
                         h2("Widgets tab content")
                 )
+                
+                
             )
         )
     )

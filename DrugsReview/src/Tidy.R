@@ -7,7 +7,7 @@ data("stop_words")
 
 drugsCom.train <- read_tsv("Data/drugsComTrain_raw.tsv")
 
-drugsCom.train <- drugsCom.train %>% mutate(condition = ifelse(str_detect(condition, "users found this"), NA, condition)) %>%  anti_join(stop_words)
+drugsCom.train <- drugsCom.train %>% mutate(condition = ifelse(str_detect(condition, "users found this"), NA, condition))
 
 tidyComms <- drugsCom.train %>% unnest_tokens(word, review) %>% anti_join(stop_words)
 
