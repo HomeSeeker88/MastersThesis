@@ -27,9 +27,10 @@ shinyUI(
             tabItems(
                 # First tab content
                 tabItem(tabName = "exploratory",
+                        h2("Analiza eksploracyjna - spis komentarzy i bazowe statystyki"),
                         fluidRow(selectInput("inputCateg", label = "Wybierz kategorię",
-                                                                     choices = unique(drugsCom.train$condition))),
-                        selectInput("inputDrug", label = "Wybierz lek", choices = unique(drugsCom.train$drugName)),
+                                                                     choices = unique(drugsCom.train$condition)),
+                        selectInput("inputDrug", label = "Wybierz lek", choices = unique(drugsCom.train$drugName))),
                         dataTableOutput("reviews"),
                         plotlyOutput("condition_piechart"),
                         plotlyOutput("drugName_piechart")
@@ -37,7 +38,13 @@ shinyUI(
                 
                 # Second tab content
                 tabItem(tabName = "sentiment",
-                        h2("Widgets tab content")
+                        h2("Analiza sentymentu"),
+                        fluidRow(selectInput("inputCategSent", label = "Wybierz kategorię",
+                                             choices = unique(drugsCom.train$condition)),
+                                 selectInput("inputDrugSent", label = "Wybierz lek", choices = unique(drugsCom.train$drugName))),
+                        plotOutput("wordcloud"),
+                        plotOutput("feelwords")
+                        
                 )
                 
                 
