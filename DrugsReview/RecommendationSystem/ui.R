@@ -9,6 +9,8 @@
 
 library(shiny)
 library(shinydashboard)
+library(plotly)
+library(lubridate)
 
 # Define UI for application that draws a histogram
 shinyUI(
@@ -17,7 +19,9 @@ shinyUI(
         
         sidebar <- dashboardSidebar(
             sidebarMenu(
-                menuItem("Analiza eksploracyjna", tabName = "exploratory", icon = icon("dashboard"))
+                menuItem("Analiza eksploracyjna", tabName = "exploratory", icon = icon("dashboard"),
+                         menuItem("Najważniejsze informacje", tabName = "summary"),
+                         menuItem("Najlepsze leki", tabName = "BestDrugs"))
             ),
             sidebarMenu(
                 menuItem("Analiza sentymentu", tabName = "sentiment", icon = icon("angry"))
@@ -26,7 +30,7 @@ shinyUI(
         body <- dashboardBody(
             tabItems(
                 # First tab content
-                tabItem(tabName = "exploratory",
+                tabItem(tabName = "summary",
                         h2("Analiza eksploracyjna - spis komentarzy i bazowe statystyki"),
                         fluidRow(selectInput("inputCateg", label = "Wybierz kategorię",
                                                                      choices = unique(drugsCom.train$condition)),
@@ -35,6 +39,11 @@ shinyUI(
                         plotlyOutput("condition_piechart"),
                         plotlyOutput("drugName_piechart")
                 ),
+                tabItem(tabName = "BestDrugs",
+                        h2("Najlepsze leki na poszczególne przypadłości"),
+                        fluidRow(selectInput("inputCategSentBestDrugs", label = "Wybierz kategorię",
+                                             choices = unique(drugsCom.train$condition))),
+                        plotlyOutput("TopDrugPlot")),
                 
                 # Second tab content
                 tabItem(tabName = "sentiment",

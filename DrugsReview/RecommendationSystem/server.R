@@ -27,6 +27,14 @@ shinyServer(function(input, output) {
                                                mutate(condition = ifelse(n < 500, 'other', drugName)) %>% 
                                                plot_ly(labels = ~drugName, values = ~n, type = 'pie'))
     
+    output$TopDrugPlot <-renderPlotly(drugsCom.train %>% filter(condition == input$inputCategSentBestDrugs) %>% 
+                                      group_by(drugName) %>% summarise(AvgRating = mean(rating)) %>%
+                                      arrange(desc(AvgRating)) %>% head(15) %>% ggplot(aes(x = fct_reorder(drugName, AvgRating),
+                                                                                           y = AvgRating))+
+                                      geom_bar(aes(y=AvgRating, fill = drugName), stat='identity', show.legend = F)+
+                                      ylab("Średnia ocena") + xlab("Nazwa leku")+
+                                      theme(axis.text.x = element_text(angle = 45, hjust = 1)))
+    
     tmpSent <- drugsCom.train %>% filter(condition == input$inputCategSent)
     updateSelectInput(session = getDefaultReactiveDomain(), "inputDrugSent", label = "Wybierz lek", choices = unique(tmpSent$drugName))
     
