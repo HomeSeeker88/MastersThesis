@@ -25,6 +25,9 @@ shinyUI(
             ),
             sidebarMenu(
                 menuItem("Analiza sentymentu", tabName = "sentiment", icon = icon("angry"))
+            ),
+            sidebarMenu(
+                menuItem("Model klasyfikacji komentarzy", tabName = "model", icon = icon("book"))
             )
         ),
         body <- dashboardBody(
@@ -41,6 +44,9 @@ shinyUI(
                 ),
                 tabItem(tabName = "BestDrugs",
                         h2("Najlepsze leki na poszczególne przypadłości"),
+                        fluidRow(infoBoxOutput("AverageRatingInfoBox"),
+                                 infoBoxOutput("CountOpinionsInfoBox"),
+                                 infoBoxOutput("UsefulCountInfoBox")),
                         fluidRow(selectInput("inputCategSentBestDrugs", label = "Wybierz kategorię",
                                              choices = unique(drugsCom.train$condition))),
                         plotlyOutput("TopDrugPlot")),

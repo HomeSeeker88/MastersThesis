@@ -25,7 +25,7 @@ shinyServer(function(input, output) {
                                       plot_ly(labels = ~condition, values = ~n, type = 'pie') %>% layout(title = 'Jakie kategorie są najpopularniejsze'))
     output$drugName_piechart <- renderPlotly(drugsCom.train %>% filter(condition == input$inputCateg) %>% group_by(drugName) %>% count(sort = T) %>%
                                                mutate(condition = ifelse(n < 500, 'other', drugName)) %>% 
-                                               plot_ly(labels = ~drugName, values = ~n, type = 'pie'))
+                                               plot_ly(labels = ~drugName, values = ~n, type = 'pie') %>% layout(title = "Najczęściej oceniane leki"))
     
     output$TopDrugPlot <-renderPlotly(drugsCom.train %>% filter(condition == input$inputCategSentBestDrugs) %>% 
                                       group_by(drugName) %>% summarise(AvgRating = mean(rating)) %>%
@@ -41,6 +41,21 @@ shinyServer(function(input, output) {
     output$wordcloud <- renderPlot(tidyComms %>% filter(condition == input$inputCategSent) %>%  inner_join(get_sentiments("bing")) %>% count(word, sentiment, sort = T) %>% 
                                      acast(formula = word ~ sentiment, value.var = "n", fill = 0) %>% 
                                      comparison.cloud(colors = c ("red", "green"),max.words = 100)
+    )
+    
+    output$AverageRatingInfoBox <- renderInfoBox(
+      infoBox("Średnia ocena w tej kategorii", drugsCom.train %>% filter(condition == input$inputCategSentBestDrugs) %>% 
+                summarise(Avg = mean(rating)) %>% as.numeric() %>% round(digits=2),icon = icon("calculator"))
+    )
+    
+    output$CountOpinionsInfoBox <- renderInfoBox(
+      infoBox("Ilość komentarzy w tej kategorii", drugsCom.train %>% filter(condition == input$inputCategSentBestDrugs) %>% 
+                count() %>% as.numeric())
+    )
+    
+    output$UsefulCountInfoBox <- renderInfoBox(
+      infoBox("Ilość polubień w tej kategorii", drugsCom.train %>% filter(condition == input$inputCategSentBestDrugs) %>% 
+                summarise(Total = sum(usefulCount)) %>% as.numeric(), icon = icon("thumbs-up"))
     )
     
     output$feelwords <- renderPlot ({
