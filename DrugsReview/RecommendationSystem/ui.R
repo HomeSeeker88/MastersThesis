@@ -58,7 +58,9 @@ shinyUI(
                                              choices = unique(drugsCom.train$condition)),
                                  selectInput("inputDrugSent", label = "Wybierz lek", choices = unique(drugsCom.train$drugName))),
                         plotOutput("wordcloud"),
-                        plotOutput("feelwords")
+                        plotOutput("feelwords"),
+                        plotOutput("tfIdf")
+                        
                         
                 )
                 

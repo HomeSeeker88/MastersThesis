@@ -86,6 +86,17 @@ shinyServer(function(input, output) {
                                       xlab("Words preceded by \"feel\"") +
                                       ylab("Sentiment score * number of occurences") + 
                                       coord_flip()})
+    
+    output$tfIdf <- renderPlot({
+      tidyComms <- drugsCom.train %>% filter(condition == input$inputDrugSent) %>% 
+        unnest_tokens(word, review) %>% anti_join(stop_words)
+      
+      wordcounts <- tidyComms %>% group_by(drugName) %>% 
+        summarise(words= n())
+    })
+    
+    
+
                   
   })
 
