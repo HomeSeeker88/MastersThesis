@@ -77,6 +77,17 @@ feel_words %>%
   ylab("Sentiment score * number of occurences") + 
   coord_flip()
 
+not %>% 
+  mutate(contribution = n * value) %>% 
+  arrange(desc(abs(contribution))) %>% 
+  head(20) %>% 
+  mutate(secondword = reorder(secondword, contribution)) %>% 
+  ggplot(aes(secondword, n * value, fill = n * value < 0)) +
+  geom_col(show.legend = F) + 
+  xlab("Words preceded by \"no\" or \"not\"") +
+  ylab("Sentiment score * number of occurences") + 
+  coord_flip()
+
 
 library(igraph)
 

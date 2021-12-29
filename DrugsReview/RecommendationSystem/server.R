@@ -95,6 +95,46 @@ shinyServer(function(input, output) {
         summarise(words= n())
     })
     
+    output$notwords <- renderPlot({
+      drugsCom.bigrams <- drugsCom.train %>% filter(drugName == input$inputDrugSent) %>% 
+        mutate(condition = ifelse(str_detect(condition, "users found this"), NA, condition)) %>% unnest_tokens(bigram,
+                                                                                                               review,
+                                                                                                               token = "ngrams",
+                                                                                                               n = 2)
+      drugsCom.bigrams %>% count(bigram, sort = T)
+      
+      bigrams.separated <- drugsCom.bigrams %>% 
+        separate(bigram, c("firstword", "secondword"), sep = " ")
+      
+      bigrams.separated <- bigrams.separated %>% 
+        dplyr::filter(!(firstword %in% stop_words$word)| firstword=='not' | firstword =='no') %>% 
+        dplyr::filter(!secondword %in% stop_words$word)
+      
+      not <- bigrams.separated %>% 
+        dplyr::filter(firstword == 'no' | firstword == 'not') %>% inner_join(AFINN, by = c(secondword = "word")) %>% 
+        count(secondword, value, sort = T) %>% 
+        ungroup()
+      
+      not %>% 
+        mutate(contribution = n * value) %>% 
+        arrange(desc(abs(contribution))) %>% 
+        head(20) %>% 
+        mutate(secondword = reorder(secondword, contribution)) %>% 
+        ggplot(aes(secondword, n * value, fill = n * value < 0)) +
+        geom_col(show.legend = F) + 
+        xlab("Words preceded by \"no\" or \"not\"") +
+        ylab("Sentiment score * number of occurences") + 
+        coord_flip()})
+    
+    output$tfIdf <- renderPlot({
+      tidyComms <- drugsCom.train %>% filter(condition == input$inputDrugSent) %>% 
+        unnest_tokens(word, review) %>% anti_join(stop_words)
+      
+      wordcounts <- tidyComms %>% group_by(drugName) %>% 
+        summarise(words= n())
+      
+    })
+    
     
 
                   
