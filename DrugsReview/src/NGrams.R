@@ -28,7 +28,7 @@ bigrams.separated <- drugsCom.bigrams %>%
   separate(bigram, c("firstword", "secondword"), sep = " ")
 
 bigrams.separated <- bigrams.separated %>% 
-  dplyr::filter(!(firstword %in% stop_words$word)) %>% 
+  dplyr::filter(!(firstword %in% stop_words$word)| firstword=='not' | firstword =='no') %>% 
   dplyr::filter(!secondword %in% stop_words$word)
 
 bigrams.counts <- bigrams.separated %>% count(firstword, secondword, sort = T)
@@ -56,6 +56,12 @@ bad_word <- bigrams.separated %>% dplyr::filter(firstword == "bad") %>%
 
 feel_words <- bigrams.separated %>% 
   dplyr::filter(str_detect(firstword, pattern = "feel")) %>% inner_join(AFINN, by = c(secondword = "word")) %>% 
+  count(secondword, value, sort = T) %>% 
+  ungroup()
+
+
+not <- bigrams.separated %>% 
+  dplyr::filter(firstword == 'no' | firstword == 'not') %>% inner_join(AFINN, by = c(secondword = "word")) %>% 
   count(secondword, value, sort = T) %>% 
   ungroup()
 
