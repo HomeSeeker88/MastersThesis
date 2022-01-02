@@ -127,11 +127,24 @@ shinyServer(function(input, output) {
         coord_flip()})
     
     output$tfIdf <- renderPlot({
-      tidyComms <- drugsCom.train %>% filter(condition == input$inputDrugSent) %>% 
+      tidyComms <- drugsCom.train %>% filter(drugName == input$inputDrugSent) %>% 
         unnest_tokens(word, review) %>% anti_join(stop_words)
       
-      wordcounts <- tidyComms %>% group_by(drugName) %>% 
-        summarise(words= n())
+      wordComms<- tidyComms %>% 
+        count(drugName, word, sort= T)
+      
+      
+      
+      totalWords <- wordComms %>% group_by(drugName) %>% 
+        summarize(total = sum(n))
+      
+      
+      wordComms <- left_join(wordComms, totalWords)
+      
+      
+      
+      wordComms %>% ggplot(aes(n/total, fill = drugName))+
+        geom_histogram(show.legend = F) + xlim(NA, 0.009)
       
     })
     
