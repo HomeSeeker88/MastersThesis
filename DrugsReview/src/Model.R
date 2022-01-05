@@ -51,8 +51,8 @@ input <- layer_input(shape = c(1), dtype = "string")
 
 output <- input %>% 
   text_vectorization() %>% 
-  layer_embedding(input_dim = num_words + 1, output_dim = 16) %>% 
-  layer_global_average_pooling_1d() %>% 
+  layer_embedding(input_dim = num_words + 1, output_dim = 128) %>%
+  layer_global_max_pooling_1d() %>% 
   layer_dense(units = 16, activation = 'relu') %>% 
   layer_dropout(0.5) %>% 
   layer_dense(units = 1, activation = 'sigmoid')
@@ -78,5 +78,9 @@ results <- model %>% evaluate(X_test, Y_test, verbose = 0)
 results
 
 plot(history)
+
+model %>% save_model_tf("MyModel")
+
+model %>% predict(X_train[1])
 
 #TODO: ZROBIĆ NA PECECIE
