@@ -27,7 +27,9 @@ shinyUI(
                 menuItem("Analiza sentymentu", tabName = "sentiment", icon = icon("angry"))
             ),
             sidebarMenu(
-                menuItem("Model klasyfikacji komentarzy", tabName = "model", icon = icon("book"))
+                menuItem("Model", tabName = "model", icon = icon("book"),
+                         menuItem("Podsumowanie modelu", tabName = "modelSummary"),
+                         menuItem("Weryfikacja komentarza", tabName = "modelTesting"))
             )
         ),
         body <- dashboardBody(
@@ -39,8 +41,7 @@ shinyUI(
                                                                      choices = unique(drugsCom.train$condition)),
                         selectInput("inputDrug", label = "Wybierz lek", choices = unique(drugsCom.train$drugName))),
                         dataTableOutput("reviews"),
-                        plotlyOutput("condition_piechart"),
-                        plotlyOutput("drugName_piechart")
+                        plotlyOutput("rating_histogram")
                 ),
                 tabItem(tabName = "BestDrugs",
                         h2("Najlepsze leki na poszczególne przypadłości"),
@@ -49,7 +50,9 @@ shinyUI(
                                  infoBoxOutput("UsefulCountInfoBox")),
                         fluidRow(selectInput("inputCategSentBestDrugs", label = "Wybierz kategorię",
                                              choices = unique(drugsCom.train$condition))),
-                        plotlyOutput("TopDrugPlot")),
+                        plotlyOutput("TopDrugPlot"),
+                        plotlyOutput("condition_piechart"),
+                        plotlyOutput("drugName_piechart")),
                 
                 # Second tab content
                 tabItem(tabName = "sentiment",

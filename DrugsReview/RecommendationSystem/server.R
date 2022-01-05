@@ -23,9 +23,15 @@ shinyServer(function(input, output) {
     output$condition_piechart <- renderPlotly(drugsCom.train %>% group_by(condition) %>% count(sort = T) %>%
                                       mutate(condition = ifelse(n < 2000, 'other', condition)) %>%
                                       plot_ly(labels = ~condition, values = ~n, type = 'pie') %>% layout(title = 'Jakie kategorie są najpopularniejsze'))
-    output$drugName_piechart <- renderPlotly(drugsCom.train %>% filter(condition == input$inputCateg) %>% group_by(drugName) %>% count(sort = T) %>%
+    output$drugName_piechart <- renderPlotly(drugsCom.train %>% filter(condition == input$inputCategSentBestDrugs) %>% group_by(drugName) %>% count(sort = T) %>%
                                                mutate(condition = ifelse(n < 500, 'other', drugName)) %>% 
                                                plot_ly(labels = ~drugName, values = ~n, type = 'pie') %>% layout(title = "Najczęściej oceniane leki"))
+    
+    output$rating_histogram <- renderPlotly({
+      drugsCom.train %>%
+        filter(drugName == input$inputDrug) %>% ggplot() +
+        geom_histogram(aes(x = rating, fill = drugName), bins = 10, show.legend = F)
+    }) 
     
     output$TopDrugPlot <-renderPlotly(drugsCom.train %>% filter(condition == input$inputCategSentBestDrugs) %>% 
                                       group_by(drugName) %>% summarise(AvgRating = mean(rating)) %>%
