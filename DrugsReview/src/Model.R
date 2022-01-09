@@ -1,5 +1,6 @@
 library(tidyverse)
 library(keras)
+library(deepviz)
 drugsCom.train <- read_tsv("Data/drugsComTrain_raw.tsv")
 drugsCom.test <- read_tsv("Data/drugsComTest_raw.tsv")
 
@@ -52,6 +53,7 @@ input <- layer_input(shape = c(1), dtype = "string")
 output <- input %>% 
   text_vectorization() %>% 
   layer_embedding(input_dim = num_words + 1, output_dim = 128) %>%
+  #layer_conv_1d(filters = 32, kernel_size = 7, activation = 'relu') %>% 
   layer_global_max_pooling_1d() %>% 
   layer_dense(units = 16, activation = 'relu') %>% 
   layer_dropout(0.5) %>% 
