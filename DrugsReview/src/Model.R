@@ -81,6 +81,10 @@ plot(history)
 
 model %>% save_model_tf("MyModel")
 
+model <- load_model_tf("MyModel")
+
 model %>% predict(X_train[1])
+
+model %>% plot_model()
 
 #TODO: ZROBIĆ NA PECECIE
