@@ -1,6 +1,10 @@
 library(tidyverse)
 library(keras)
 library(deepviz)
+library(caret)
+library(pROC)
+library(ggthemes)
+
 drugsCom.train <- read_tsv("Data/drugsComTrain_raw.tsv")
 drugsCom.test <- read_tsv("Data/drugsComTest_raw.tsv")
 
@@ -88,5 +92,27 @@ model <- load_model_tf("MyModel")
 model %>% predict(X_train[1])
 
 model %>% plot_model()
+
+results <- predict(model, X_test, type = "response")
+
+rocLR<-roc(Y_test, results)
+
+LR.DF<-data.frame(sensitivity=rocLR$sensitivities,specificity=rocLR$specificities)
+
+auc(Y_test, results)
+
+ggplot(LR.DF,aes(x=specificity,y=sensitivity))+geom_path(size=0.5,color='blue')+scale_x_reverse()+
+  geom_abline(intercept =1,lty=1,color="red")+theme_solarized()+
+  ggtitle("Wykres krzywej ROC dla modelu sieci neuronowej")
+
+drugsCom.test <- drugsCom.test %>% 
+  mutate (modelResponse = ifelse(model %>% predict(review, type = "response") >= 0.75, "Opinia pozytywna",
+                                 "Opinia negatywna"))%>% 
+  mutate(Correct = case_when(
+    rating >= 7 & modelResponse == "Opinia pozytywna" ~ TRUE,
+    rating >= 7 & modelResponse != "Opinia pozytywna" ~ FALSE,
+    rating < 7 & modelResponse == "Opinia negatywna" ~ TRUE,
+    TRUE~FALSE
+  ))
 
 #TODO: ZROBIĆ NA PECECIE

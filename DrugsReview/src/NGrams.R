@@ -22,6 +22,9 @@ drugsCom.bigrams <- drugsCom.train %>%
                                                                                                          review,
                                                                                                          token = "ngrams",
                                                                                                          n = 2)
+
+drugsCom.test <- drugsCom.test %>% drop_na(condition) %>% drop_na(drugName)
+
 drugsCom.bigrams %>% count(bigram, sort = T)
 
 bigrams.separated <- drugsCom.bigrams %>% 

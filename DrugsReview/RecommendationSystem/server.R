@@ -17,9 +17,9 @@ shinyServer(function(input, output) {
     
     tmp <- drugsCom.train %>% filter(condition == input$inputCateg)
     
-    updateSelectInput(session = getDefaultReactiveDomain(), "inputDrug", label = "Wybierz lek", choices = unique(tmp$drugName))
+    updateSelectizeInput(session = getDefaultReactiveDomain(), "inputDrug", label = "Wybierz lek", choices = unique(tmp$drugName))
     
-    output$reviews <- renderDataTable(drugsCom.train %>% filter(condition == input$inputCateg & drugName == input$inputDrug) %>% select(uniqueID, review, usefulCount))
+    output$reviews <- renderDT(drugsCom.train %>% filter(condition == input$inputCateg & drugName == input$inputDrug) %>% select(uniqueID, review, usefulCount))
     output$condition_piechart <- renderPlotly(drugsCom.train %>% group_by(condition) %>% count(sort = T) %>%
                                       mutate(condition = ifelse(n < 2000, 'other', condition)) %>%
                                       plot_ly(labels = ~condition, values = ~n, type = 'pie') %>% layout(title = 'Jakie kategorie są najpopularniejsze'))
@@ -42,7 +42,7 @@ shinyServer(function(input, output) {
                                       theme(axis.text.x = element_text(angle = 45, hjust = 1)))
     
     tmpSent <- drugsCom.train %>% filter(condition == input$inputCategSent)
-    updateSelectInput(session = getDefaultReactiveDomain(), "inputDrugSent", label = "Wybierz lek", choices = unique(tmpSent$drugName))
+    updateSelectizeInput(session = getDefaultReactiveDomain(), "inputDrugSent", label = "Wybierz lek", choices = unique(tmpSent$drugName))
     
     output$wordcloud <- renderPlot(tidyComms %>% filter(condition == input$inputCategSent) %>%  inner_join(get_sentiments("bing")) %>% count(word, sentiment, sort = T) %>% 
                                      acast(formula = word ~ sentiment, value.var = "n", fill = 0) %>% 
@@ -153,6 +153,74 @@ shinyServer(function(input, output) {
         geom_histogram(show.legend = F) + xlim(NA, 0.009)
       
     })
+    
+    output$GeneralAccuracy <- renderInfoBox({
+      percentage <- drugsCom.test %>% filter(Correct == T) %>% 
+        nrow()
+      
+      n <- drugsCom.test %>% nrow()
+      
+      infoBox("Procent dobrych odpowiedzi dla całego zbioru testowego", paste0(round(percentage/n * 100), "%"), icon = icon("dashboard"))
+    })
+    
+    output$modelPlot <- renderPlot({
+      plot(history)
+    }, width = 600, height = 500)
+    
+    output$rocPlot <- renderPlot({
+      ggplot(LR.DF,aes(x=specificity,y=sensitivity))+geom_path(size=0.5,color='blue')+scale_x_reverse()+
+        geom_abline(intercept =1,lty=1,color="red")+theme_solarized()+
+        ggtitle("Wykres krzywej ROC dla modelu sieci neuronowej")
+    },width = 600, height = 500)
+    
+    output$Response <- renderInfoBox({
+
+      res <- model %>% predict(input$inputComment)
+      if (is.nan(res)){
+        infoBox("Odpowiedź modelu ", "brak odpowiedzi", icon = icon("thumbs-up"))
+      }
+      else if (res > 0.75){
+        infoBox("Odpowiedź modelu ", "Opinia pozytywna", icon = icon("thumbs-up"))
+      }else{
+        infoBox("Odpowiedź modelu ", "Opinia negatywna", icon = icon("thumbs-down"))
+      }
+      #infoBox("as",res, icon = icon("thumbs-up"))
+
+      
+    })
+    
+  
+    
+    tmpModel <- drugsCom.test %>% filter(condition == input$inputModelCateg)
+    
+    updateSelectizeInput(session = getDefaultReactiveDomain(), "inputModelDrug", label = "Wybierz lek", choices = unique(tmpModel$drugName))
+    
+    output$testReviews <- renderDT({
+      dt <- datatable(drugsCom.test %>% filter(drugsCom.test$condition == input$inputModelCateg &
+                                 drugsCom.test$drugName == input$inputModelDrug) %>% 
+        select(uniqueID, review, rating, modelResponse, usefulCount, Correct))
+      
+      dt %>%  formatStyle(columns = "Correct", valueColumns = "Correct", target = "row",
+                          backgroundColor =  styleEqual(levels = c(TRUE, FALSE),
+                                                           values = c("lightgreen", "red")))
+        
+    })
+    
+    output$Accuracy <- renderInfoBox({
+      percentage <- drugsCom.test %>% filter(drugsCom.test$condition == input$inputModelCateg &
+                                 drugsCom.test$drugName == input$inputModelDrug) %>% 
+        filter(Correct == TRUE) %>% nrow() %>% as.numeric()
+      
+      n <- drugsCom.test %>% filter(drugsCom.test$condition == input$inputModelCateg &
+                                 drugsCom.test$drugName == input$inputModelDrug) %>% nrow()
+      
+      
+      infoBox("Procent dobrych odpowiedzi dla wybranego leku", value = paste0(round(percentage/n, 2)*100, "%"), icon = icon("dashboard"))
+    }
+      
+    )
+    
+
     
     
 
