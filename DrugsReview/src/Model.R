@@ -15,7 +15,7 @@ drugsCom.train <- drugsCom.train %>%
       TRUE ~ condition
     ),
     TRUE ~ condition
-  )) %>% mutate(condition = ifelse(str_detect(condition, "users found this"), NA, condition), rating = ifelse(rating >= 7, 1, 0))
+  )) %>% mutate(condition = ifelse(str_detect(condition, "users found this"), NA, condition))
 
 
 drugsCom.test <- drugsCom.test %>% 
@@ -25,13 +25,13 @@ drugsCom.test <- drugsCom.test %>%
       TRUE ~ condition
     ),
     TRUE ~ condition
-  )) %>% mutate(condition = ifelse(str_detect(condition, "users found this"), NA, condition), rating = ifelse(rating >= 7, 1, 0))
+  )) %>% mutate(condition = ifelse(str_detect(condition, "users found this"), NA, condition))
 
 X_train <- drugsCom.train$review
-Y_train <- drugsCom.train$rating
+Y_train <- ifelse(drugsCom.train$rating >= 7, 1, 0)
 
 X_test <- drugsCom.test$review
-Y_test <- drugsCom.test$rating
+Y_test <- ifelse(drugsCom.test$rating>= 7, 1, 0)
 
 #X_train
 #Y_train
@@ -101,12 +101,12 @@ LR.DF<-data.frame(sensitivity=rocLR$sensitivities,specificity=rocLR$specificitie
 
 auc(Y_test, results)
 
-ggplot(LR.DF,aes(x=specificity,y=sensitivity))+geom_path(size=0.5,color='blue')+scale_x_reverse()+
+rocggplot(LR.DF,aes(x=specificity,y=sensitivity))+geom_path(size=0.5,color='blue')+scale_x_reverse()+
   geom_abline(intercept =1,lty=1,color="red")+theme_solarized()+
   ggtitle("Wykres krzywej ROC dla modelu sieci neuronowej")
 
 drugsCom.test <- drugsCom.test %>% 
-  mutate (modelResponse = ifelse(model %>% predict(review, type = "response") >= 0.75, "Opinia pozytywna",
+  mutate (modelResponse = ifelse(model %>% predict(review, type = "response") >= 0.7, "Opinia pozytywna",
                                  "Opinia negatywna"))%>% 
   mutate(Correct = case_when(
     rating >= 7 & modelResponse == "Opinia pozytywna" ~ TRUE,
@@ -115,4 +115,17 @@ drugsCom.test <- drugsCom.test %>%
     TRUE~FALSE
   ))
 
+m <- table(drugsCom.test$Correct, drugsCom.test$modelResponse) %>% as.data.frame()
+
+trueP <- m[4,3]
+trueN <- m[2,3]
+trueP
+trueN
+falseP <- m[3,3]
+falseN <- m[1,3]
+
+spec <- round(trueP/(trueP+falseN), 2)
+sens <- round(trueN/(trueN+falseP), 2)
+spec
+sens
 #TODO: ZROBIĆ NA PECECIE
