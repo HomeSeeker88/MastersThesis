@@ -115,11 +115,11 @@ wordComms %>% select(-total) %>%
 
 
 wordComms %>% arrange(desc(tf_idf)) %>% 
-  inner_join(top6) %>% 
+  inner_join(top6)  %>% 
   mutate(word = factor(word, levels = rev(unique(word)))) %>% 
-  group_by(drugName) %>% 
+  group_by(drugName) %>%
   top_n(n = 2) %>% 
-  ungroup() %>% 
+  ungroup() %>% head(10) %>% 
   ggplot(aes(word, tf_idf, fill = drugName)) +
   geom_col(show.legend = F) +
   labs(x = NULL, y = "tf-idf") + 
