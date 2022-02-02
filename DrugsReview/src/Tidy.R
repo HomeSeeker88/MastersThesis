@@ -9,7 +9,8 @@ drugsCom.train <- read_tsv("Data/drugsComTrain_raw.tsv")
 
 drugsCom.test <- read_tsv("Data/drugsComTest_raw.tsv")
 
-drugsCom.train <- drugsCom.train %>% mutate(condition = ifelse(str_detect(condition, "users found this"), NA, condition))
+drugsCom.train <- drugsCom.train %>% mutate(condition = ifelse(str_detect(condition, "users found this"), NA, condition),
+                                            Year = as.numeric(str_sub(date, start = - 4)))
 
 drugsCom.test <- drugsCom.test %>% drop_na(condition) %>% drop_na(drugName)
 
@@ -69,7 +70,12 @@ totalWords <- wordComms %>% group_by(drugName) %>%
 
 wordComms <- left_join(wordComms, totalWords)
 
-top6<- wordComms %>%  arrange(desc(total)) %>% distinct(drugName, total) %>% top_n(6)
+top6<- wordComms %>%  arrange(desc(total)) %>% distinct(drugName, total) %>% filter(drugName %in% c("Levonorgestrel",
+                                                                                                    "Etonogestrel",
+                                                                                                    "Nexplanon",
+                                                                                                    "Phentermine",
+                                                                                                    "Sertraline",
+                                                                                                    "Mirena"))
 
 wordComms %>% inner_join(top6, by = c("drugName", "total")) %>% ggplot(aes(n/total, fill = drugName))+
   geom_histogram(show.legend = F) + xlim(NA, 0.009) + facet_wrap(~drugName, ncol=2, scales = "free_y")
