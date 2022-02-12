@@ -83,6 +83,9 @@ wordComms %>% inner_join(top6, by = c("drugName", "total")) %>% ggplot(aes(n/tot
 
 freq_by_rank <- wordComms %>% group_by(drugName) %>% mutate(rank = row_number(), term.frequency= n/total)
 
+wordComms %>% arrange(desc(tf_idf)) %>% 
+  inner_join(top6) %>% group_by(drugName) %>% ungroup() %>% ggplot(aes(tf_idf, fill = drugName)) +geom_histogram(show.legend = F)+facet_wrap(~drugName, ncol = 2, scales ="free_y")
+
 freq_by_rank %>% inner_join(top6, by= c("drugName", "total")) %>% ggplot(aes(rank, term.frequency, color = drugName)) + 
   geom_line(size = 1.1, alpha = 0.8, show.legend = F)+
   scale_x_log10()+
