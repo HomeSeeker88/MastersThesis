@@ -2,7 +2,8 @@ library(tidytext)
 library(tidyverse)
 library(wordcloud)
 library(reshape2)
-
+library(igraph)
+library(ggraph)
 data("stop_words")
 
 drugsCom.train <- read_tsv("Data/drugsComTrain_raw.tsv")
@@ -17,8 +18,9 @@ drugsCom.train <- drugsCom.train %>%
   )) %>% mutate(condition = ifelse(str_detect(condition, "users found this"), NA, condition))
 
 stop_words
+
 drugsCom.bigrams <- drugsCom.train %>%
-  mutate(condition = ifelse(str_detect(condition, "users found this"), NA, condition)) %>% unnest_tokens(bigram,
+  mutate(condition = ifelse(str_detect(condition, "users found this"), NA, condition))  %>% unnest_tokens(bigram,
                                                                                                          review,
                                                                                                          token = "ngrams",
                                                                                                          n = 2)
@@ -65,6 +67,11 @@ feel_words <- bigrams.separated %>%
 
 not <- bigrams.separated %>% 
   dplyr::filter(firstword == 'no' | firstword == 'not') %>% inner_join(AFINN, by = c(secondword = "word")) %>% 
+  count(secondword, value, sort = T) %>% 
+  ungroup()
+
+sick_words <- bigrams.separated %>% 
+  dplyr::filter(str_detect(firstword, pattern = "sick")) %>% inner_join(AFINN, by = c(secondword = "word")) %>% 
   count(secondword, value, sort = T) %>% 
   ungroup()
 

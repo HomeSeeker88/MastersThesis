@@ -57,7 +57,7 @@ input <- layer_input(shape = c(1), dtype = "string")
 output <- input %>% 
   text_vectorization() %>% 
   layer_embedding(input_dim = num_words + 1, output_dim = 128) %>%
-  #layer_conv_1d(filters = 32, kernel_size = 7, activation = 'relu') %>% 
+  #layer_conv_1d(filters = 2, kernel_size = 3, activation = 'relu') %>% 
   layer_global_max_pooling_1d() %>% 
   layer_dense(units = 16, activation = 'relu') %>% 
   layer_dropout(0.5) %>% 
@@ -101,7 +101,7 @@ LR.DF<-data.frame(sensitivity=rocLR$sensitivities,specificity=rocLR$specificitie
 
 auc(Y_test, results)
 
-rocggplot(LR.DF,aes(x=specificity,y=sensitivity))+geom_path(size=0.5,color='blue')+scale_x_reverse()+
+ggplot(LR.DF,aes(x=specificity,y=sensitivity))+geom_path(size=0.5,color='blue')+scale_x_reverse()+
   geom_abline(intercept =1,lty=1,color="red")+theme_solarized()+
   ggtitle("Wykres krzywej ROC dla modelu sieci neuronowej")
 
