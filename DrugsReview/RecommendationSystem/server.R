@@ -200,8 +200,8 @@ shinyServer(function(input, output) {
                                  drugsCom.test$drugName == input$inputModelDrug) %>% 
         select(uniqueID, review, rating, modelResponse, usefulCount, Correct))
       
-      dt %>%  formatStyle(columns = "Correct", valueColumns = "Correct", target = "row",
-                          backgroundColor =  styleEqual(levels = c(TRUE, FALSE),
+      dt %>%  formatStyle(columns = "modelResponse", valueColumns = "modelResponse", target = "row",
+                          backgroundColor =  styleEqual(levels = c("Opinia pozytywna", "Opinia negatywna"),
                                                            values = c("lightgreen", "red")))
         
     })
@@ -219,7 +219,27 @@ shinyServer(function(input, output) {
     }
       
     )
-    
+    output$Recommendation <- renderInfoBox({
+      percentage <- drugsCom.test %>% filter(drugsCom.test$condition == input$inputModelCateg &
+                                               drugsCom.test$drugName == input$inputModelDrug) %>%
+        filter(modelResponse == "Opinia pozytywna") %>% nrow() %>% as.numeric()
+
+      n <- drugsCom.test %>% filter(drugsCom.test$condition == input$inputModelCateg &
+                                      drugsCom.test$drugName == input$inputModelDrug) %>% nrow()
+
+      if(percentage/n >= 0.75){
+        infoBox("Procent osób rekomendujących ten lek według modelu", value = paste0(round(percentage/n, 2)*100, "%"), icon = icon("smile"))
+      }
+      else if (percentage/n >0.5 & percentage/n <0.75){
+        infoBox("Procent osób rekomendujących ten lek według modelu", value = paste0(round(percentage/n, 2)*100, "%"), icon = icon("meh"))
+      }
+      else{
+        infoBox("Procent osób rekomendujących ten lek według modelu", value = paste0(round(percentage/n, 2)*100, "%"), icon = icon("frown"))
+      }
+      
+      
+    })
+
 
     
     
