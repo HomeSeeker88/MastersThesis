@@ -126,6 +126,8 @@ falseN <- m[1,3]
 
 spec <- round(trueP/(trueP+falseN), 2)
 sens <- round(trueN/(trueN+falseP), 2)
+prec <- round(trueP/(trueP + falseP), 2)
+f1 <- round(2 * (prec*sens/(prec + sens)), 2)
 spec
 sens
 #TODO: ZROBIĆ NA PECECIE
