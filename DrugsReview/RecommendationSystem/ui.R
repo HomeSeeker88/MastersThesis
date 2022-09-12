@@ -29,6 +29,7 @@ shinyUI(
             ),
             sidebarMenu(
                 menuItem("Model", tabName = "model", icon = icon("book"),
+                         menuItem("Tworzenie modelu", tabName = "modelCreation"),
                          menuItem("Podsumowanie modelu", tabName = "modelSummary"),
                          menuItem("Weryfikacja komentarza", tabName = "modelTesting"))
             )
@@ -68,6 +69,16 @@ shinyUI(
                         
                         
                 ),
+                tabItem(tabName = "modelCreation",
+                        h2("Tworzenie modelu"),
+                        h3("Wpisz hiperparametry sieci"),
+                        fluidRow(numericInput("inputBatchSize", label = "Wpisz batch size", value = 64, width = "10%"),
+                                 numericInput("inputEpoc", label = "Wpisz liczbę iteracji", value = 10, width = "10%"),
+                                 numericInput("inputDenseUnits", label = "Wpisz liczbę neuronów w warstwie gęstej", value = 16, width = "10%"),
+                                 numericInput("inputRate", label = "Wpisz współczynnik dropoutu", value = 0.5, width = "10%"),
+                                 actionButton("inputModelButton", "Stwórz model", class = "btn-success")),
+                        fluidRow(plotOutput("modelLossPlot"),
+                                 plotOutput("modelROCPLOT"))),
                 tabItem(tabName = "modelSummary",
                         h2("Podsumowanie modelu"),
                         fluidRow(infoBoxOutput("GeneralAccuracy")),

@@ -154,6 +154,66 @@ shinyServer(function(input, output) {
       
     })
     
+    results <- observeEvent(input$inputModelButton,{
+      
+      X_train <- drugsCom.train$review
+      Y_train <- ifelse(drugsCom.train$rating >= 7, 1, 0)
+      
+      X_test <- drugsCom.test$review
+      Y_test <- ifelse(drugsCom.test$rating>= 7, 1, 0)
+      
+      #X_train
+      #Y_train
+      
+      X_train %>% str_split(" ") %>% 
+        sapply(length) %>% 
+        summary()
+      
+      num_words <- 10000
+      max_length <- 100
+      
+      history <- model %>% fit(
+        X_train,
+        Y_train,
+        epochs = input$inputEpoc,
+        batch_size = input$inputBatchSize,
+        validation_split = 0.2,
+        verbose=2
+      )
+      
+      results <- model %>% evaluate(X_test, Y_test, verbose = 0)
+      results
+      
+      plot(history)
+      
+      model %>% save_model_tf("MyModel")
+      
+      model <- load_model_tf("MyModel")
+      
+      model %>% predict(X_train[1])
+      
+      model %>% plot_model()
+      
+      results <- predict(model, X_test, type = "response")
+      
+     
+      
+      
+     
+    })
+    
+    output$modelLossPlot<- renderPlot({
+      plot(history)
+    }, 
+    width = 600, height = 500)
+ 
+    
+    output$modelROCPLOT <- renderPlot({
+      ggplot(LR.DF,aes(x=specificity,y=sensitivity))+geom_path(size=0.5,color='blue')+scale_x_reverse()+
+        geom_abline(intercept =1,lty=1,color="red")+theme_solarized()+
+        ggtitle("Wykres krzywej ROC dla modelu sieci neuronowej")
+    }, width = 600, height = 500 )
+    
     output$GeneralAccuracy <- renderInfoBox({
       percentage <- drugsCom.test %>% filter(Correct == T) %>% 
         nrow()

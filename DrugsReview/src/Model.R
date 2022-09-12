@@ -130,4 +130,6 @@ prec <- round(trueP/(trueP + falseP), 2)
 f1 <- round(2 * (prec*sens/(prec + sens)), 2)
 spec
 sens
+
+plot(history)
 #TODO: ZROBIĆ NA PECECIE
