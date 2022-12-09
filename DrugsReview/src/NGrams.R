@@ -4,6 +4,7 @@ library(wordcloud)
 library(reshape2)
 library(igraph)
 library(ggraph)
+library(scales)
 data("stop_words")
 
 drugsCom.train <- read_tsv("Data/drugsComTrain_raw.tsv")
@@ -126,13 +127,6 @@ ggraph(bigrams.graph, layout = "fr") +
   theme_void()
 
 
-drugsCom.train <- drugsCom.train %>%
-  mutate(condition = ifelse(str_detect(condition, "users found this"), NA, condition))
 
-drugsCom.train %>% group_by(Year) %>% count(sort = T) %>% mutate(n=fct_infreq(percent(n/sumComms)),
-                                                                 Year = as.character(Year)) %>%
-  ggplot(aes(x=Year,y=n))+geom_bar(stat='identity', aes(fill = Year), show.legend = F)+
-  geom_text(aes(label = n), vjust = -.5) + xlab("Rok") + ylab("Procent wszystkich komentarzy") +
-  ggtitle("W których latach udzielano najwięcej komentarzy")
 
 

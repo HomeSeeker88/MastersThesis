@@ -132,4 +132,3 @@ spec
 sens
 
 plot(history)
-#TODO: ZROBIĆ NA PECECIE
